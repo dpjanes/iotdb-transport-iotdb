@@ -46,11 +46,17 @@ var IOTDBTransport = function (initd) {
         initd,
         iotdb.keystore().get("/transports/IOTDBTransport/initd"),
         {
-            prefix: ""
         }
     );
+
+    if (!initd.things) {
+        throw new Error("initd.things is required");
+    }
+    if (_.isThingArray(initd.things)) {
+        throw new Error("initd.things must be a ThingArray");
+    }
     
-    self.native = 1; // something
+    self.native = initd.things
 };
 
 /**
@@ -71,8 +77,12 @@ IOTDBTransport.prototype.list = function(paramd, callback) {
         callback = arguments[0];
     }
 
-    // callback([ id ])
-    // callback(null);
+    for (var i = 0; i < self.native.length; i++) {
+        var thing = self.native[i];
+        callback([ thing.thing_id() ]);
+    }
+
+    callback(null);
 };
 
 /**
@@ -87,13 +97,12 @@ IOTDBTransport.prototype.get = function(id, band, callback) {
         throw new Error("band is required");
     }
 
-    var channel = self._channel(id, band);
-
-    // callback(id, band, null); does not exist
-    // OR
-    // callback(id, band, undefined); don't know
-    // OR
-    // callback(id, band, d); data
+    var thing = self._thing_by_id(id);
+    if (!thing) {
+        return callback(id, band, null); 
+    }
+    
+    return callback(id, band, self._get_thing_band(thing, band));
 };
 
 /**
@@ -115,6 +124,7 @@ IOTDBTransport.prototype.update = function(id, band, value) {
 };
 
 /**
+ *  Probably could be made a hell of a lot more efficient
  */
 IOTDBTransport.prototype.updated = function(id, band, callback) {
     var self = this;
@@ -128,8 +138,29 @@ IOTDBTransport.prototype.updated = function(id, band, callback) {
         callback = arguments[1];
     }
 
+    var _monitor_band = function(_band) {
+        if ((band === "istate") || (band === "ostate") || (band === "meta")) {
+            self.native.on(band, function(thing) {
+                if (id && (thing.thing_id() !== id)) {
+                    return;
+                }
 
-    // callback(id, band, undefined);
+                callback(thing.thing_id(), band, self._thing_get_band(thing, band));
+            });
+        } else if (band === "model") {
+        } else {
+            return null;
+        }
+    };
+
+    if (band) {
+        _monitor_band(band);
+    } else {
+        var bands = [ "istate", "ostate", "meta", "model" ];
+        for (var bi in bands) {
+            _monitor_band(bands[bi]);
+        };
+    }
 };
 
 /**
@@ -137,55 +168,33 @@ IOTDBTransport.prototype.updated = function(id, band, callback) {
 IOTDBTransport.prototype.remove = function(id, band) {
     var self = this;
 
-    if (!id) {
-        throw new Error("id is required");
-    }
-
-    var channel = self._channel(id, band);
+    throw new Error("Not implemented");
 };
 
 /* -- internals -- */
-IOTDBTransport.prototype._channel = function(id, band, paramd) {
-    var self = this;
-
-    paramd = _.defaults(paramd, {
-        mkdirs: false,
-    });
-
-    var channel = self.initd.prefix;
-    if (id) {
-        channel = path.join(channel, _encode(id));
-
-        if (band) {
-            channel = path.join(channel, _encode(band));
+IOTDBTransport.prototype._thing_by_id = function(id) {
+    for (var i = 0; i < self.native.length; i++) {
+        var thing = self.native[i];
+        if (thing.thing_id() === id) {
+            return thing;
         }
     }
 
-    return channel;
+    return null;
 };
 
-var _encode = function(s) {
-    return s.replace(/[\/$%#.\]\[]/g, function(c) {
-        return '%' + c.charCodeAt(0).toString(16);
-    });
-};
-
-var _decode = function(s) {
-    return decodeURIComponent(s);
-}
-
-var _unpack = function(d) {
-    return _.d.transform(d, {
-        pre: _.ld_compact,
-        key: _decode,
-    });
-};
-
-var _pack = function(d) {
-    return _.d.transform(d, {
-        pre: _.ld_compact,
-        key: _encode,
-    });
+IOTDBTransport.prototype._get_thing_band = function(thing, band) {
+    if (band === "istate") {
+        return thing.state({ istate: true, ostate: false });
+    } else if (band === "ostate") {
+        return thing.state({ istate: false, ostate: true });
+    } else if (band === "model") {
+        return _.ld.compact(thing.jsonld());
+    } else if (band === "meta") {
+        return _.ld.compact(thing.meta().state());
+    } else {
+        return null;
+    }
 };
 
 /**
