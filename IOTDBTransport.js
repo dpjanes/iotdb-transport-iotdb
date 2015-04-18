@@ -115,9 +115,6 @@ IOTDBTransport.prototype.get = function(id, band, callback) {
     if (!id) {
         throw new Error("id is required");
     }
-    if (!band) {
-        throw new Error("band is required");
-    }
 
     var thing = self._thing_by_id(id);
     if (!thing) {
@@ -142,14 +139,17 @@ IOTDBTransport.prototype.update = function(id, band, value) {
         throw new Error("band is required");
     }
 
+    console.log("HERE:IOTDBTransport.update");
+
     /* XXX: at some point in the future we should be able to add new things */
     var thing = self._thing_by_id(id);
     if (!thing) {
+        /* XXX: maybe raise an exception? */
         return;
     }
 
     if (band === "ostate") {
-        thing.update(value);
+        thing.update(value, { notify: true });
     } else if (band === "ostate") {
     } else if (band === "meta") {
     } else {
@@ -218,7 +218,11 @@ IOTDBTransport.prototype._thing_by_id = function(id) {
 };
 
 IOTDBTransport.prototype._get_thing_band = function(thing, band) {
-    if (band === "istate") {
+    if (!band) {
+        return {
+            bands: [ "istate", "ostate", "model", "meta" ],
+        }
+    } else if (band === "istate") {
         return thing.state({ istate: true, ostate: false });
     } else if (band === "ostate") {
         return thing.state({ istate: false, ostate: true });
