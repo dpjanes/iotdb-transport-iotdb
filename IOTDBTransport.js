@@ -117,7 +117,7 @@ IOTDBTransport.prototype.added = function(paramd, callback) {
 /**
  *  See {iotdb.transporter.Transport#get} for documentation.
  */
-IOTDBTransport.prototype.get = function(id, band, callback) {
+IOTDBTransport.prototype.get = function(paramd, callback) {
     var self = this;
 
     self._validate_get(paramd, callback);
@@ -132,9 +132,9 @@ IOTDBTransport.prototype.get = function(id, band, callback) {
     }
     
     return callback({
-        id: id, 
-        band: band, 
-        value: self._get_thing_band(thing, band),
+        id: paramd.id, 
+        band: paramd.band, 
+        value: self._get_thing_band(thing, paramd.band),
     });
 };
 
@@ -169,6 +169,11 @@ IOTDBTransport.prototype.update = function(paramd, callback) {
 IOTDBTransport.prototype.updated = function(paramd, callback) {
     var self = this;
 
+    if (arguments.length === 1) {
+        paramd = {};
+        callback = arguments[0];
+    }
+
     self._validate_updated(paramd, callback);
 
     var _monitor_band = function(_band) {
@@ -178,7 +183,11 @@ IOTDBTransport.prototype.updated = function(paramd, callback) {
                     return;
                 }
 
-                callback(thing.thing_id(), _band, self._get_thing_band(thing, _band));
+                callback({
+                    id: thing.thing_id(), 
+                    band: _band, 
+                    value: self._get_thing_band(thing, _band),
+                });
             });
         } else if (_band === "model") {
         } else {
@@ -211,7 +220,7 @@ IOTDBTransport.prototype._thing_by_id = function(id) {
 };
 
 IOTDBTransport.prototype._get_thing_band = function(thing, band) {
-    if (!band) {
+    if (band === ".") {
         return {
             bands: [ "istate", "ostate", "model", "meta" ],
         }
