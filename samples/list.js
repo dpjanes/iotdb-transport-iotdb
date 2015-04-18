@@ -9,10 +9,22 @@
  *  Make sure to see README first
  */
 
-var Transport = require('../FSTransport').FSTransport;
+var iotdb = require('iotdb');
+var iot = iotdb.iot();
+var things = iot.connect();
 
-var p = new Transport({
+var Transport = require('../IOTDBTransport').IOTDBTransport;
+
+var transport = new Transport({}, things);
+transport.list(function(d) {
+    if (!d) {
+        return;
+    }
+    console.log("+", d.id);
 });
-p.list(function(id) {
-    console.log(id);
+transport.added(function(d) {
+    if (!d) {
+        return;
+    }
+    console.log("+", d.id);
 });

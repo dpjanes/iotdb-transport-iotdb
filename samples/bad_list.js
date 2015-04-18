@@ -13,6 +13,6 @@ var Transport = require('../IOTDBTransport').IOTDBTransport;
 
 var p = new Transport({
 });
-p.list(function(ids) {
-    console.log(ids);
+p.list(function(ld) {
+    console.log(ld.id);
 });

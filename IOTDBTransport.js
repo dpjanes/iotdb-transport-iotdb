@@ -82,9 +82,13 @@ IOTDBTransport.prototype.list = function(paramd, callback) {
         callback = arguments[0];
     }
 
+    self._validate_list(paramd, callback);
+
     for (var i = 0; i < self.native.length; i++) {
         var thing = self.native[i];
-        callback(thing.thing_id());
+        callback({
+            id: thing.thing_id(),
+        });
     }
 
     callback(null);
@@ -101,8 +105,12 @@ IOTDBTransport.prototype.added = function(paramd, callback) {
         callback = arguments[0];
     }
 
+    self._validate_added(paramd, callback);
+
     self.native.on("thing", function(thing) {
-        callback(thing.thing_id());
+        callback({
+            id: thing.thing_id(),
+        });
     });
 };
 
@@ -112,16 +120,22 @@ IOTDBTransport.prototype.added = function(paramd, callback) {
 IOTDBTransport.prototype.get = function(id, band, callback) {
     var self = this;
 
-    if (!id) {
-        throw new Error("id is required");
-    }
+    self._validate_get(paramd, callback);
 
-    var thing = self._thing_by_id(id);
+    var thing = self._thing_by_id(paramd.id);
     if (!thing) {
-        return callback(id, band, null); 
+        return callback({
+            id: paramd.id, 
+            band: paramd.band, 
+            value: null,
+        }); 
     }
     
-    return callback(id, band, self._get_thing_band(thing, band));
+    return callback({
+        id: id, 
+        band: band, 
+        value: self._get_thing_band(thing, band),
+    });
 };
 
 /**
@@ -129,59 +143,38 @@ IOTDBTransport.prototype.get = function(id, band, callback) {
  *  <p>
  *  NOT FINISHED
  */
-IOTDBTransport.prototype.update = function(id, band, value) {
+IOTDBTransport.prototype.update = function(paramd, callback) {
     var self = this;
 
-    if (!id) {
-        throw new Error("id is required");
-    }
-    if (!band) {
-        throw new Error("band is required");
-    }
-
-    console.log("HERE:IOTDBTransport.update");
+    self._validate_update(paramd, callback);
 
     /* XXX: at some point in the future we should be able to add new things */
-    var thing = self._thing_by_id(id);
+    var thing = self._thing_by_id(paramd.id);
     if (!thing) {
         /* XXX: maybe raise an exception? */
         return;
     }
 
-    if (band === "ostate") {
-        thing.update(value, { notify: true });
-    } else if (band === "ostate") {
-    } else if (band === "meta") {
+    if (paramd.band === "ostate") {
+        thing.update(paramd.value, { notify: true });
+    } else if (paramd.band === "ostate") {
+    } else if (paramd.band === "meta") {
     } else {
     }
-
-    /*
-    var channel = self._channel(id, band, { mkdirs: true });
-    var d = _pack(value);
-    */
-
-    // do something
 };
 
 /**
  *  See {iotdb.transporter.Transport#updated} for documentation.
  */
-IOTDBTransport.prototype.updated = function(id, band, callback) {
+IOTDBTransport.prototype.updated = function(paramd, callback) {
     var self = this;
 
-    if (arguments.length === 1) {
-        id = null;
-        band = null;
-        callback = arguments[0];
-    } else if (arguments.length === 2) {
-        band = null;
-        callback = arguments[1];
-    }
+    self._validate_updated(paramd, callback);
 
     var _monitor_band = function(_band) {
         if ((_band === "istate") || (_band === "ostate") || (_band === "meta")) {
             self.native.on(_band, function(thing) {
-                if (id && (thing.thing_id() !== id)) {
+                if (paramd.id && (thing.thing_id() !== paramd.id)) {
                     return;
                 }
 
@@ -193,8 +186,8 @@ IOTDBTransport.prototype.updated = function(id, band, callback) {
         }
     };
 
-    if (band) {
-        _monitor_band(band);
+    if (paramd.band) {
+        _monitor_band(paramd.band);
     } else {
         var bands = [ "istate", "ostate", "meta", "model" ];
         for (var bi in bands) {
