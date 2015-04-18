@@ -115,6 +115,26 @@ IOTDBTransport.prototype.added = function(paramd, callback) {
 };
 
 /**
+ *  See {iotdb.transporter.Transport#about} for documentation.
+ */
+IOTDBTransport.prototype.about = function(paramd, callback) {
+    var self = this;
+
+    self._validate_about(paramd, callback);
+
+    var thing = self._thing_by_id(paramd.id);
+    if (!thing) {
+        return callback({
+            id: paramd.id, 
+        }); 
+    }
+    
+    return callback({
+        id: paramd.id, 
+        bands: [ "istate", "ostate", "model", "meta", ],
+    });
+};
+/**
  *  See {iotdb.transporter.Transport#get} for documentation.
  */
 IOTDBTransport.prototype.get = function(paramd, callback) {
