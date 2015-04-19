@@ -5,8 +5,10 @@
  *  IOTDB.org
  *  2015-04-01
  *
- *  Demonstrate receiving
  *  Make sure to see README first
+ *
+ *  Hint:
+ *  node list | grep '^+'
  */
 
 var iotdb = require('iotdb');
@@ -17,14 +19,11 @@ var Transport = require('../IOTDBTransport').IOTDBTransport;
 
 var transport = new Transport({}, things);
 transport.list(function(d) {
-    if (!d) {
+    if (d.end) {
         return;
     }
     console.log("+", d.id);
 });
 transport.added(function(d) {
-    if (!d) {
-        return;
-    }
     console.log("+", d.id);
 });

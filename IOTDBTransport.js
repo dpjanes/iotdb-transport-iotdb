@@ -91,7 +91,9 @@ IOTDBTransport.prototype.list = function(paramd, callback) {
         });
     }
 
-    callback(null);
+    callback({
+        end: true,
+    });
 };
 
 /**
