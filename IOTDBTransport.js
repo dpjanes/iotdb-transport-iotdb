@@ -86,9 +86,11 @@ IOTDBTransport.prototype.list = function(paramd, callback) {
 
     for (var i = 0; i < self.native.length; i++) {
         var thing = self.native[i];
-        callback({
+        if (callback({
             id: thing.thing_id(),
-        });
+        })) {
+            break;
+        }
     }
 
     callback({
