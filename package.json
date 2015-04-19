@@ -6,9 +6,6 @@
     "dependencies": {
         "validate": "~2.1.6"
     }, 
-    "peerDependencies": {
-        "iotdb": ">=0.5.11"
-    }, 
     "description": "HomeStar / IOTDB Bridge for Filesystems", 
     "devDependencies": {
         "grunt": "~0.4.5", 
@@ -26,6 +23,9 @@
     "license": "Apache-2.0", 
     "main": "index.js", 
     "name": "iotdb-transport-iotdb", 
+    "peerDependencies": {
+        "iotdb": ">=0.5.13"
+    }, 
     "private": false, 
     "repository": {
         "type": "git", 
@@ -34,5 +34,5 @@
     "scripts": {
         "test": "grunt"
     }, 
-    "version": "0.0.0"
+    "version": "0.0.1"
 }
