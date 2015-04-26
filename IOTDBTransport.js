@@ -56,25 +56,23 @@ var IOTDBTransport = function (initd, things) {
 
     self.initd = _.defaults(
         initd,
-        iotdb.keystore().get("/transports/IOTDBTransport/initd"),
-        {
-        }
+        iotdb.keystore().get("/transports/IOTDBTransport/initd"), {}
     );
 
     if (!_.is.ThingArray(things)) {
         throw new Error("things is required and must be a ThingArray");
     }
-    
+
     self.native = things;
 };
 
-IOTDBTransport.prototype = new iotdb.transporter.Transport;
+IOTDBTransport.prototype = new iotdb.transporter.Transport();
 
 /* --- methods --- */
 /**
  *  See {iotdb.transporter.Transport#list} for documentation.
  */
-IOTDBTransport.prototype.list = function(paramd, callback) {
+IOTDBTransport.prototype.list = function (paramd, callback) {
     var self = this;
 
     if (arguments.length === 1) {
@@ -87,8 +85,8 @@ IOTDBTransport.prototype.list = function(paramd, callback) {
     for (var i = 0; i < self.native.length; i++) {
         var thing = self.native[i];
         if (callback({
-            id: thing.thing_id(),
-        })) {
+                id: thing.thing_id(),
+            })) {
             break;
         }
     }
@@ -101,7 +99,7 @@ IOTDBTransport.prototype.list = function(paramd, callback) {
 /**
  *  See {iotdb.transporter.Transport#added} for documentation.
  */
-IOTDBTransport.prototype.added = function(paramd, callback) {
+IOTDBTransport.prototype.added = function (paramd, callback) {
     var self = this;
 
     if (arguments.length === 1) {
@@ -111,7 +109,7 @@ IOTDBTransport.prototype.added = function(paramd, callback) {
 
     self._validate_added(paramd, callback);
 
-    self.native.on("thing", function(thing) {
+    self.native.on("thing", function (thing) {
         callback({
             id: thing.thing_id(),
         });
@@ -121,7 +119,7 @@ IOTDBTransport.prototype.added = function(paramd, callback) {
 /**
  *  See {iotdb.transporter.Transport#about} for documentation.
  */
-IOTDBTransport.prototype.about = function(paramd, callback) {
+IOTDBTransport.prototype.about = function (paramd, callback) {
     var self = this;
 
     self._validate_about(paramd, callback);
@@ -129,19 +127,19 @@ IOTDBTransport.prototype.about = function(paramd, callback) {
     var thing = self._thing_by_id(paramd.id);
     if (!thing) {
         return callback({
-            id: paramd.id, 
-        }); 
+            id: paramd.id,
+        });
     }
-    
+
     return callback({
-        id: paramd.id, 
-        bands: [ "istate", "ostate", "model", "meta", ],
+        id: paramd.id,
+        bands: ["istate", "ostate", "model", "meta", ],
     });
 };
 /**
  *  See {iotdb.transporter.Transport#get} for documentation.
  */
-IOTDBTransport.prototype.get = function(paramd, callback) {
+IOTDBTransport.prototype.get = function (paramd, callback) {
     var self = this;
 
     self._validate_get(paramd, callback);
@@ -149,16 +147,16 @@ IOTDBTransport.prototype.get = function(paramd, callback) {
     var thing = self._thing_by_id(paramd.id);
     if (!thing) {
         return callback({
-            id: paramd.id, 
-            band: paramd.band, 
+            id: paramd.id,
+            band: paramd.band,
             value: null,
-        }); 
+        });
     }
-    
+
     return callback({
-        id: paramd.id, 
-        band: paramd.band, 
-        value: self._get_thing_band(thing, paramd.band),
+        id: paramd.id,
+        band: paramd.band,
+        value: thing.state(paramd.band),
     });
 };
 
@@ -167,7 +165,7 @@ IOTDBTransport.prototype.get = function(paramd, callback) {
  *  <p>
  *  NOT FINISHED
  */
-IOTDBTransport.prototype.update = function(paramd, callback) {
+IOTDBTransport.prototype.update = function (paramd, callback) {
     var self = this;
 
     self._validate_update(paramd, callback);
@@ -179,18 +177,20 @@ IOTDBTransport.prototype.update = function(paramd, callback) {
         return;
     }
 
+    // XXX coming soon: update istate and meta also
     if (paramd.band === "ostate") {
-        thing.update(paramd.value, { notify: true });
-    } else if (paramd.band === "ostate") {
+        thing.update("ostate", paramd.value);
+    } else if (paramd.band === "istate") {
+        // thing.update("istate", paramd.value);
     } else if (paramd.band === "meta") {
-    } else {
-    }
+        // thing.update("meta", paramd.value);
+    } else {}
 };
 
 /**
  *  See {iotdb.transporter.Transport#updated} for documentation.
  */
-IOTDBTransport.prototype.updated = function(paramd, callback) {
+IOTDBTransport.prototype.updated = function (paramd, callback) {
     var self = this;
 
     if (arguments.length === 1) {
@@ -200,37 +200,34 @@ IOTDBTransport.prototype.updated = function(paramd, callback) {
 
     self._validate_updated(paramd, callback);
 
-    var _monitor_band = function(_band) {
+    var _monitor_band = function (_band) {
         if ((_band === "istate") || (_band === "ostate") || (_band === "meta")) {
-            self.native.on(_band, function(thing) {
+            self.native.on(_band, function (thing) {
                 if (paramd.id && (thing.thing_id() !== paramd.id)) {
                     return;
                 }
 
                 callback({
-                    id: thing.thing_id(), 
-                    band: _band, 
-                    value: self._get_thing_band(thing, _band),
+                    id: thing.thing_id(),
+                    band: _band,
+                    value: thing.state(_band),
                 });
             });
-        } else if (_band === "model") {
-        } else {
-            return null;
-        }
+        } else if (_band === "model") {} else {}
     };
 
     if (paramd.band) {
         _monitor_band(paramd.band);
     } else {
-        var bands = [ "istate", "ostate", "meta", "model" ];
+        var bands = ["istate", "ostate", "meta", "model"];
         for (var bi in bands) {
             _monitor_band(bands[bi]);
-        };
+        }
     }
 };
 
 /* -- internals -- */
-IOTDBTransport.prototype._thing_by_id = function(id) {
+IOTDBTransport.prototype._thing_by_id = function (id) {
     var self = this;
 
     for (var i = 0; i < self.native.length; i++) {
@@ -241,24 +238,6 @@ IOTDBTransport.prototype._thing_by_id = function(id) {
     }
 
     return null;
-};
-
-IOTDBTransport.prototype._get_thing_band = function(thing, band) {
-    if (band === ".") {
-        return {
-            bands: [ "istate", "ostate", "model", "meta" ],
-        }
-    } else if (band === "istate") {
-        return thing.state({ istate: true, ostate: false });
-    } else if (band === "ostate") {
-        return thing.state({ istate: false, ostate: true });
-    } else if (band === "model") {
-        return _.ld.compact(thing.jsonld());
-    } else if (band === "meta") {
-        return _.ld.compact(thing.meta().state());
-    } else {
-        return null;
-    }
 };
 
 /**
