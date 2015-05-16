@@ -170,21 +170,18 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
 
     self._validate_update(paramd, callback);
 
-    /* XXX: at some point in the future we should be able to add new things */
+    // XXX: at some point in the future we should be able to add new Things
     var thing = self._thing_by_id(paramd.id);
     if (!thing) {
-        /* XXX: maybe raise an exception? */
+        logger.error({
+            method: "update",
+            cause: "hard to say - may not be important",
+            thing_id: paramd.id,
+        }, "Thing not found");
         return;
     }
 
-    // XXX coming soon: update istate and meta also
-    if (paramd.band === "ostate") {
-        thing.update("ostate", paramd.value);
-    } else if (paramd.band === "istate") {
-        // thing.update("istate", paramd.value);
-    } else if (paramd.band === "meta") {
-        // thing.update("meta", paramd.value);
-    } else {}
+    thing.update(paramd.band, paramd.value);
 };
 
 /**
