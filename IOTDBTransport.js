@@ -170,6 +170,10 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
 
     self._validate_update(paramd, callback);
 
+    if (!paramd.id.match(/^urn:iotdb:thing:/)) {
+        return;
+    }
+
     // XXX: at some point in the future we should be able to add new Things
     var thing = self._thing_by_id(paramd.id);
     if (!thing) {
