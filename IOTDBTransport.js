@@ -55,7 +55,11 @@ var IOTDBTransport = function (initd, things) {
     }
 
     self.initd = _.defaults(
-        initd,
+        initd, {
+            authorize: function () {
+                return true;
+            },
+        },
         iotdb.keystore().get("/transports/IOTDBTransport/initd"), {}
     );
 
@@ -84,6 +88,15 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
 
     for (var i = 0; i < self.native.length; i++) {
         var thing = self.native[i];
+
+        if (!self.initd.authorize({
+                id: thing.thing_id(),
+                authorize: "read",
+                user: paramd.user,
+            })) {
+            continue;
+        }
+
         if (callback({
                 id: thing.thing_id(),
             })) {
@@ -110,6 +123,14 @@ IOTDBTransport.prototype.added = function (paramd, callback) {
     self._validate_added(paramd, callback);
 
     self.native.on("thing", function (thing) {
+        if (!self.initd.authorize({
+                id: thing.thing_id,
+                authorize: "read",
+                user: paramd.user,
+            })) {
+            return;
+        }
+
         callback({
             id: thing.thing_id(),
         });
@@ -128,6 +149,18 @@ IOTDBTransport.prototype.about = function (paramd, callback) {
     if (!thing) {
         return callback({
             id: paramd.id,
+            message: "not found",
+        });
+    }
+
+    if (!self.initd.authorize({
+            id: paramd.id,
+            authorize: "read",
+            user: paramd.user,
+        })) {
+        return callback({
+            id: paramd.id,
+            message: "not authorized",
         });
     }
 
@@ -153,6 +186,17 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
         });
     }
 
+    if (!self.initd.authorize({
+            id: paramd.id,
+            authorize: "read",
+            user: paramd.user,
+        })) {
+        return callback({
+            id: paramd.id,
+            message: "not authorized",
+        });
+    }
+
     return callback({
         id: paramd.id,
         band: paramd.band,
@@ -169,9 +213,15 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
     var self = this;
 
     self._validate_update(paramd, callback);
+    callback = callback || function() {};
 
     if (!paramd.id.match(/^urn:iotdb:thing:/)) {
-        return;
+        return callback({
+            id: paramd.id,
+            band: paramd.band,
+            value: paramd.value,
+            message: "not a Thing",
+        });
     }
 
     // XXX: at some point in the future we should be able to add new Things
@@ -182,10 +232,34 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
             cause: "hard to say - may not be important",
             thing_id: paramd.id,
         }, "Thing not found");
-        return;
+
+        return callback({
+            id: paramd.id,
+            band: paramd.band,
+            value: paramd.value,
+            message: "not a Thing",
+        });
+    }
+
+    if (!self.initd.authorize({
+            id: paramd.id,
+            authorize: "write",
+            user: paramd.user,
+        })) {
+        return callback({
+            id: paramd.id,
+            message: "not authorized",
+        });
     }
 
     thing.update(paramd.band, paramd.value);
+
+    return callback({
+        id: paramd.id,
+        band: paramd.band,
+        value: paramd.value,
+        message: "not a Thing",
+    });
 };
 
 /**
@@ -201,10 +275,28 @@ IOTDBTransport.prototype.updated = function (paramd, callback) {
 
     self._validate_updated(paramd, callback);
 
+    if (paramd.id) {
+        if (!self.initd.authorize({
+                id: paramd.id,
+                authorize: "read",
+                user: paramd.user,
+            })) {
+            return;
+        }
+    }
+
     var _monitor_band = function (_band) {
         if ((_band === "istate") || (_band === "ostate") || (_band === "meta")) {
             self.native.on(_band, function (thing) {
                 if (paramd.id && (thing.thing_id() !== paramd.id)) {
+                    return;
+                }
+
+                if (!self.initd.authorize({
+                        id: paramd.id,
+                        authorize: "read",
+                        user: paramd.user,
+                    })) {
                     return;
                 }
 
