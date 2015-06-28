@@ -59,6 +59,7 @@ var IOTDBTransport = function (initd, things) {
             authorize: function () {
                 return true;
             },
+            user: null,
         },
         iotdb.keystore().get("/transports/IOTDBTransport/initd"), {}
     );
@@ -80,7 +81,9 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
     var self = this;
 
     if (arguments.length === 1) {
-        paramd = {};
+        paramd = {
+            user: self.initd.user,
+        };
         callback = arguments[0];
     }
 
@@ -99,6 +102,7 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
 
         if (callback({
                 id: thing.thing_id(),
+                user: self.initd.user,
             })) {
             break;
         }
@@ -116,7 +120,9 @@ IOTDBTransport.prototype.added = function (paramd, callback) {
     var self = this;
 
     if (arguments.length === 1) {
-        paramd = {};
+        paramd = {
+            user: self.initd.user,
+        };
         callback = arguments[0];
     }
 
@@ -124,7 +130,7 @@ IOTDBTransport.prototype.added = function (paramd, callback) {
 
     self.native.on("thing", function (thing) {
         if (!self.initd.authorize({
-                id: thing.thing_id,
+                id: thing.thing_id(),
                 authorize: "read",
                 user: paramd.user,
             })) {
@@ -133,6 +139,7 @@ IOTDBTransport.prototype.added = function (paramd, callback) {
 
         callback({
             id: thing.thing_id(),
+            user: self.initd.user,
         });
     });
 };
@@ -150,6 +157,7 @@ IOTDBTransport.prototype.about = function (paramd, callback) {
         return callback({
             id: paramd.id,
             message: "not found",
+            user: self.initd.user,
         });
     }
 
@@ -161,6 +169,7 @@ IOTDBTransport.prototype.about = function (paramd, callback) {
         return callback({
             id: paramd.id,
             message: "not authorized",
+            user: self.initd.user,
         });
     }
 
@@ -183,6 +192,7 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
             id: paramd.id,
             band: paramd.band,
             value: null,
+            user: self.initd.user,
         });
     }
 
@@ -194,6 +204,7 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
         return callback({
             id: paramd.id,
             message: "not authorized",
+            user: self.initd.user,
         });
     }
 
@@ -201,6 +212,7 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
         id: paramd.id,
         band: paramd.band,
         value: thing.state(paramd.band),
+        user: self.initd.user,
     });
 };
 
@@ -258,7 +270,7 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
         id: paramd.id,
         band: paramd.band,
         value: paramd.value,
-        message: "not a Thing",
+        user: self.initd.user,
     });
 };
 
@@ -269,7 +281,9 @@ IOTDBTransport.prototype.updated = function (paramd, callback) {
     var self = this;
 
     if (arguments.length === 1) {
-        paramd = {};
+        paramd = {
+            user: self.initd.user,
+        };
         callback = arguments[0];
     }
 
@@ -285,6 +299,12 @@ IOTDBTransport.prototype.updated = function (paramd, callback) {
         }
     }
 
+    if (!paramd.user) {
+        console.log("BAD USER", paramd);
+        console.trace();
+        process.exit(0)
+    }
+
     var _monitor_band = function (_band) {
         if ((_band === "istate") || (_band === "ostate") || (_band === "meta")) {
             self.native.on(_band, function (thing) {
@@ -293,7 +313,7 @@ IOTDBTransport.prototype.updated = function (paramd, callback) {
                 }
 
                 if (!self.initd.authorize({
-                        id: paramd.id,
+                        id: thing.thing_id(),
                         authorize: "read",
                         user: paramd.user,
                     })) {
@@ -304,6 +324,7 @@ IOTDBTransport.prototype.updated = function (paramd, callback) {
                     id: thing.thing_id(),
                     band: _band,
                     value: thing.state(_band),
+                    user: self.initd.user,
                 });
             });
         } else if (_band === "model") {} else {}
