@@ -40,6 +40,11 @@ var MSG_NOT_AUTHORIZED = "not authorized";
 var MSG_NOT_FOUND = "not found";
 var MSG_NOT_THING = "not a Thing";
 
+var CODE_NOT_AUTHORIZED = 401;
+var CODE_NOT_FOUND = 404;
+var CODE_NOT_THING = 403;
+
+
 /* --- constructor --- */
 /**
  *  Create a Transporter for IOTDB Things.
@@ -60,7 +65,7 @@ var IOTDBTransport = function (initd, things) {
 
     self.initd = _.defaults(
         initd, {
-            authorize: function (callback) {
+            authorize: function (authd, callback) {
                 return callback(null, true);
             },
             user: null,
@@ -123,7 +128,7 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
 
                 return callback({
                     error: MSG_NOT_AUTHORIZED,
-                    status: 401,
+                    status: CODE_NOT_AUTHORIZED,
                     end: true,
                 });
             }
@@ -190,7 +195,7 @@ IOTDBTransport.prototype.about = function (paramd, callback) {
         return callback({
             id: paramd.id,
             error: MSG_NOT_FOUND,
-            status: 404,
+            status: CODE_NOT_FOUND,
             user: self.initd.user,
         });
     }
@@ -207,7 +212,7 @@ IOTDBTransport.prototype.about = function (paramd, callback) {
         };
         if (!is_authorized) {
             callbackd.error = MSG_NOT_AUTHORIZED;
-            callbackd.status = 401;
+            callbackd.status = CODE_NOT_AUTHORIZED;
         } else {
             callbackd.bands = ["istate", "ostate", "model", "meta", ];
         }
@@ -230,7 +235,7 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
             band: paramd.band,
             value: null,
             error: MSG_NOT_FOUND,
-            status: 404,
+            status: CODE_NOT_FOUND,
             user: self.initd.user,
         });
     }
@@ -251,7 +256,7 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
 
         if (!is_authorized) {
             callbackd.error = MSG_NOT_AUTHORIZED;
-            callbackd.status = 401;
+            callbackd.status = CODE_NOT_AUTHORIZED;
         } else {
             callbackd.value = thing.state(paramd.band);
         }
@@ -277,7 +282,7 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
             band: paramd.band,
             value: paramd.value,
             error: MSG_NOT_THING,
-            status: 403,
+            status: CODE_NOT_THING,
         });
     }
 
@@ -295,7 +300,7 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
             band: paramd.band,
             value: paramd.value,
             error: MSG_NOT_FOUND,
-            status: 404,
+            status: CODE_NOT_FOUND,
         });
     }
 
@@ -315,7 +320,7 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
 
         if (!is_authorized) {
             callbackd.error = MSG_NOT_AUTHORIZED;
-            callbackd.status = 401;
+            callbackd.status = CODE_NOT_AUTHORIZED;
         } else {
             thing.update(paramd.band, paramd.value);
         }
@@ -358,11 +363,13 @@ IOTDBTransport.prototype.updated = function (paramd, callback) {
     }
     */
 
+    /*
     if (!paramd.user) {
         console.log("BAD USER", paramd);
         console.trace();
         process.exit(0);
     }
+    */
 
     var _monitor_band = function (_band) {
         if ((_band === "istate") || (_band === "ostate") || (_band === "meta")) {
