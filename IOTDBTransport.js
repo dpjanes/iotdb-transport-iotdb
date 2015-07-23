@@ -23,6 +23,7 @@
 "use strict";
 
 var iotdb = require('iotdb');
+var iotdb_transport = require('iotdb-transport');
 var _ = iotdb._;
 var bunyan = iotdb.bunyan;
 
@@ -51,7 +52,7 @@ var CODE_NOT_THING = 403;
  *  <p>
  *  Bands for IOTDB are inherenly "istate", "ostate", "model", "meta".
  *  <p>
- *  See {iotdb.transporter.Transport#Transport} for documentation.
+ *  See {iotdb_transport.Transport#Transport} for documentation.
  *
  *  @constructor
  */
@@ -80,11 +81,12 @@ var IOTDBTransport = function (initd, things) {
     self.native = things;
 };
 
-IOTDBTransport.prototype = new iotdb.transporter.Transport();
+IOTDBTransport.prototype = new iotdb_transport.Transport();
+IOTDBTransport.prototype._class = "IOTDBTransport";
 
 /* --- methods --- */
 /**
- *  See {iotdb.transporter.Transport#list} for documentation.
+ *  See {iotdb_transport.Transport#list} for documentation.
  */
 IOTDBTransport.prototype.list = function (paramd, callback) {
     var self = this;
@@ -148,7 +150,7 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
 };
 
 /**
- *  See {iotdb.transporter.Transport#added} for documentation.
+ *  See {iotdb_transport.Transport#added} for documentation.
  */
 IOTDBTransport.prototype.added = function (paramd, callback) {
     var self = this;
@@ -183,7 +185,7 @@ IOTDBTransport.prototype.added = function (paramd, callback) {
 };
 
 /**
- *  See {iotdb.transporter.Transport#about} for documentation.
+ *  See {iotdb_transport.Transport#about} for documentation.
  */
 IOTDBTransport.prototype.about = function (paramd, callback) {
     var self = this;
@@ -221,7 +223,7 @@ IOTDBTransport.prototype.about = function (paramd, callback) {
     });
 };
 /**
- *  See {iotdb.transporter.Transport#get} for documentation.
+ *  See {iotdb_transport.Transport#get} for documentation.
  */
 IOTDBTransport.prototype.get = function (paramd, callback) {
     var self = this;
@@ -266,7 +268,7 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
 };
 
 /**
- *  See {iotdb.transporter.Transport#update} for documentation.
+ *  See {iotdb_transport.Transport#update} for documentation.
  *  <p>
  *  NOT FINISHED
  */
@@ -330,7 +332,7 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
 };
 
 /**
- *  See {iotdb.transporter.Transport#updated} for documentation.
+ *  See {iotdb_transport.Transport#updated} for documentation.
  */
 IOTDBTransport.prototype.updated = function (paramd, callback) {
     var self = this;
