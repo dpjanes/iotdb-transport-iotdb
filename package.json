@@ -24,8 +24,8 @@
     "main": "index.js", 
     "name": "iotdb-transport-iotdb", 
     "peerDependencies": {
-        "iotdb-transport": "",
-        "iotdb": "~0.8.1"
+        "iotdb": "~0.9.1", 
+        "iotdb-transport": "~0.0.6"
     }, 
     "private": false, 
     "repository": {
@@ -35,5 +35,5 @@
     "scripts": {
         "test": "grunt"
     }, 
-    "version": "0.0.8"
+    "version": "0.0.9"
 }
