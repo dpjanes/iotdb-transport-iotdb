@@ -101,6 +101,11 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
     self._validate_list(paramd, callback);
 
     var count = self.native.length;
+    if (count === 0) {
+        return callback({
+            end: true,
+        });
+    }
 
     var _authorize = function (thing) {
         var _after_authorize = function (_error, is_authorized) {
