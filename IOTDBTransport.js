@@ -221,6 +221,17 @@ IOTDBTransport.prototype.about = function (paramd, callback) {
             callbackd.status = CODE_NOT_AUTHORIZED;
         } else {
             callbackd.bands = ["istate", "ostate", "model", "meta", ];
+            callbackd.bandd = {
+                "istate": null,
+                "ostate": null,
+                "model": null,
+                "meta": null,
+            };
+
+            var model_iri = thing.model_first("iot:model", null);
+            if (model_iri) {
+                callbackd.bandd["model"] = model_iri;
+            }
         }
 
         return callback(callbackd);
