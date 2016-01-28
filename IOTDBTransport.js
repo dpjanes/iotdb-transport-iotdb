@@ -180,12 +180,12 @@ IOTDBTransport.prototype.added = function (paramd, callback) {
 };
 
 /**
- *  See {iotdb_transport.Transport#about} for documentation.
+ *  See {iotdb_transport.Transport#bands} for documentation.
  */
-IOTDBTransport.prototype.about = function (paramd, callback) {
+IOTDBTransport.prototype.bands = function (paramd, callback) {
     var self = this;
 
-    self._validate_about(paramd, callback);
+    self._validate_bands(paramd, callback);
 
     var thing = self._thing_by_id(paramd.id);
     if (!thing) {
@@ -209,7 +209,6 @@ IOTDBTransport.prototype.about = function (paramd, callback) {
         if (!is_authorized) {
             callbackd.error = new errors.NotAuthorized();
         } else {
-            callbackd.bands = ["istate", "ostate", "model", "meta", ];
             callbackd.bandd = {
                 "istate": null,
                 "ostate": null,
