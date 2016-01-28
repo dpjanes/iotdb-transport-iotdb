@@ -24,6 +24,7 @@
 
 var iotdb = require('iotdb');
 var iotdb_transport = require('iotdb-transport');
+var errors = iotdb_transport.errors;
 var _ = iotdb._;
 
 var path = require('path');
@@ -35,15 +36,6 @@ var logger = iotdb.logger({
     name: 'iotdb-transport-iotdb',
     module: 'IOTDBTransport',
 });
-
-var MSG_NOT_AUTHORIZED = "not authorized";
-var MSG_NOT_FOUND = "not found";
-var MSG_NOT_THING = "not a Thing";
-
-var CODE_NOT_AUTHORIZED = 401;
-var CODE_NOT_FOUND = 404;
-var CODE_NOT_THING = 403;
-
 
 /* --- constructor --- */
 /**
@@ -133,8 +125,7 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
                 count = 0;
 
                 return callback({
-                    error: MSG_NOT_AUTHORIZED,
-                    status: CODE_NOT_AUTHORIZED,
+                    error: new errors.NotAuthorized(),
                     end: true,
                 });
             }
@@ -200,8 +191,7 @@ IOTDBTransport.prototype.about = function (paramd, callback) {
     if (!thing) {
         return callback({
             id: paramd.id,
-            error: MSG_NOT_FOUND,
-            status: CODE_NOT_FOUND,
+            error: new errors.NotFound(),
             user: self.initd.user,
         });
     }
@@ -217,8 +207,7 @@ IOTDBTransport.prototype.about = function (paramd, callback) {
             user: self.initd.user,
         };
         if (!is_authorized) {
-            callbackd.error = MSG_NOT_AUTHORIZED;
-            callbackd.status = CODE_NOT_AUTHORIZED;
+            callbackd.error = new errors.NotAuthorized();
         } else {
             callbackd.bands = ["istate", "ostate", "model", "meta", ];
             callbackd.bandd = {
@@ -251,8 +240,7 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
             id: paramd.id,
             band: paramd.band,
             value: null,
-            error: MSG_NOT_FOUND,
-            status: CODE_NOT_FOUND,
+            error: new errors.NotFound(),
             user: self.initd.user,
         });
     }
@@ -272,8 +260,7 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
         };
 
         if (!is_authorized) {
-            callbackd.error = MSG_NOT_AUTHORIZED;
-            callbackd.status = CODE_NOT_AUTHORIZED;
+            callbackd.error = new errors.NotAuthorized();
         } else {
             callbackd.value = thing.state(paramd.band);
         }
@@ -298,8 +285,7 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
             id: paramd.id,
             band: paramd.band,
             value: paramd.value,
-            error: MSG_NOT_THING,
-            status: CODE_NOT_THING,
+            error: new errors.NotAppropriate(),
         });
     }
 
@@ -316,8 +302,7 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
             id: paramd.id,
             band: paramd.band,
             value: paramd.value,
-            error: MSG_NOT_FOUND,
-            status: CODE_NOT_FOUND,
+            error: new errors.NotFound(),
         });
     }
 
@@ -336,8 +321,7 @@ IOTDBTransport.prototype.update = function (paramd, callback) {
         };
 
         if (!is_authorized) {
-            callbackd.error = MSG_NOT_AUTHORIZED;
-            callbackd.status = CODE_NOT_AUTHORIZED;
+            callbackd.error = new errors.NotAuthorized();
         } else {
             thing.update(paramd.band, paramd.value);
         }
