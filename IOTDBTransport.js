@@ -274,7 +274,7 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
  *  <p>
  *  NOT FINISHED
  */
-IOTDBTransport.prototype.update = function (paramd, callback) {
+IOTDBTransport.prototype.put = function (paramd, callback) {
     var self = this;
 
     self._validate_update(paramd, callback);
