@@ -15,7 +15,7 @@ var things = iot.connect();
 var Transport = require('../IOTDBTransport').IOTDBTransport;
 
 var transport = new Transport({}, things);
-transport.added(function(d) {
+transport.added({}, function(d) {
     transport.about(d, function(ad) {
         console.log("+", ad);
         process.exit(0)

@@ -50,11 +50,6 @@ var logger = iotdb.logger({
 var IOTDBTransport = function (initd, things) {
     var self = this;
 
-    if (arguments.length === 1) {
-        initd = {};
-        things = arguments[0];
-    }
-
     self.initd = _.defaults(
         initd, {
             authorize: function (authd, callback) {
@@ -81,13 +76,6 @@ IOTDBTransport.prototype._class = "IOTDBTransport";
  */
 IOTDBTransport.prototype.list = function (paramd, callback) {
     var self = this;
-
-    if (arguments.length === 1) {
-        paramd = {
-            user: self.initd.user,
-        };
-        callback = arguments[0];
-    }
 
     self._validate_list(paramd, callback);
 
@@ -149,13 +137,6 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
  */
 IOTDBTransport.prototype.added = function (paramd, callback) {
     var self = this;
-
-    if (arguments.length === 1) {
-        paramd = {
-            user: self.initd.user,
-        };
-        callback = arguments[0];
-    }
 
     self._validate_added(paramd, callback);
 
@@ -334,13 +315,6 @@ IOTDBTransport.prototype.put = function (paramd, callback) {
  */
 IOTDBTransport.prototype.updated = function (paramd, callback) {
     var self = this;
-
-    if (arguments.length === 1) {
-        paramd = {
-            user: self.initd.user,
-        };
-        callback = arguments[0];
-    }
 
     self._validate_updated(paramd, callback);
 

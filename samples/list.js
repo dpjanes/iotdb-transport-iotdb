@@ -18,12 +18,12 @@ var things = iot.connect();
 var Transport = require('../IOTDBTransport').IOTDBTransport;
 
 var transport = new Transport({}, things);
-transport.list(function(d) {
+transport.list({}, function(d) {
     if (d.end) {
         return;
     }
     console.log("+", d.id);
 });
-transport.added(function(d) {
+transport.added({}, function(d) {
     console.log("+", d.id);
 });
