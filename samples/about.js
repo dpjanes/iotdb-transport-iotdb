@@ -16,7 +16,12 @@ var Transport = require('../IOTDBTransport').IOTDBTransport;
 
 var transport = new Transport({}, things);
 transport.added({}, function(d) {
-    transport.about(d, function(ad) {
+    transport.bands(d, function(error, ad) {
+        if (error) {
+            console.log("#", error);
+            return;
+        }
+
         console.log("+", ad);
         process.exit(0)
     });

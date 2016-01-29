@@ -168,13 +168,12 @@ IOTDBTransport.prototype.bands = function (paramd, callback) {
 
     self._validate_bands(paramd, callback);
 
+    var bd = _.shallowCopy(paramd);
+    bd.bandd = {};
+
     var thing = self._thing_by_id(paramd.id);
     if (!thing) {
-        return callback({
-            id: paramd.id,
-            error: new errors.NotFound(),
-            user: self.initd.user,
-        });
+        return callback(new errors.NotFound(), bd);
     }
 
     var authd = {
@@ -183,27 +182,23 @@ IOTDBTransport.prototype.bands = function (paramd, callback) {
         user: paramd.user,
     };
     self.initd.authorize(authd, function (error, is_authorized) {
-        var callbackd = {
-            id: paramd.id,
-            user: self.initd.user,
-        };
         if (!is_authorized) {
-            callbackd.error = new errors.NotAuthorized();
-        } else {
-            callbackd.bandd = {
-                "istate": null,
-                "ostate": null,
-                "model": null,
-                "meta": null,
-            };
-
-            var model_iri = thing.model_first("iot:model", null);
-            if (model_iri) {
-                callbackd.bandd["model"] = model_iri;
-            }
+            return callback(new errors.NotAuthorized(), bd);
         }
 
-        return callback(callbackd);
+        bd.bandd = {
+            "istate": null,
+            "ostate": null,
+            "model": null,
+            "meta": null,
+        };
+
+        var model_iri = thing.model_first("iot:model", null);
+        if (model_iri) {
+            bd.bandd["model"] = model_iri;
+        }
+
+        return callback(null, bd);
     });
 };
 /**
