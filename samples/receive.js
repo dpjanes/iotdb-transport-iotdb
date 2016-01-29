@@ -13,7 +13,12 @@ var Transport = require('../IOTDBTransport').IOTDBTransport;
 
 var p = new Transport({
 });
-p.updated("MyThingID", "meta", function(id, band, value) {
+p.updated("MyThingID", "meta", function(error, ud) {
+    if (error) {
+        console.log("#", error);
+        return;
+    }
+
     BROKEN
     if (value === undefined) {
         p.get(id, band, function(_id, _band, value) {

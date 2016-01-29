@@ -346,7 +346,7 @@ IOTDBTransport.prototype.updated = function (paramd, callback) {
                         value: thing.state(_band),
                         user: self.initd.user,
                     };
-                    return callback(callbackd);
+                    return callback(null, callbackd);
                 });
             });
         } else if (_band === "model") {} else {}

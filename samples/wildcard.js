@@ -21,7 +21,12 @@ p.get("MyThingID", "meta", function(id, band, value) {
     console.log("+", "get", id, band, value);
 });
 BROKEN
-p.updated(function(id, band, value) {
+p.updated(function(error, ud) {
+    if (error) {
+        console.log("#", error);
+        return;
+    }
+
     if (value === undefined) {
         p.get(id, band, function(_id, _band, value) {
             if (error) {
