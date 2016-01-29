@@ -13,8 +13,13 @@ var Transport = require('../IOTDBTransport').IOTDBTransport;
 
 var p = new Transport({
 });
-p.list(function(ld) {
-    if (ld.end) {
+p.list(function(error, ld) {
+    if (error) {
+        console.log("#", "error", error);
+        return;
+    }
+    if (!ld) {
+        console.log("+", "<end>");
         break;
     }
 

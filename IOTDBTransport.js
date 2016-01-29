@@ -76,14 +76,13 @@ IOTDBTransport.prototype._class = "IOTDBTransport";
  */
 IOTDBTransport.prototype.list = function (paramd, callback) {
     var self = this;
+    var ld;
 
     self._validate_list(paramd, callback);
 
     var count = self.native.length;
     if (count === 0) {
-        return callback({
-            end: true,
-        });
+        return callback(null, null);
     }
 
     var _authorize = function (thing) {
@@ -93,11 +92,10 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
             }
 
             if (is_authorized) {
-                var callbackd = {
-                    id: thing.thing_id(),
-                    user: self.initd.user,
-                };
-                var r = callback(callbackd);
+                ld = _.shallowCopy(paramd);
+                ld.id = thing.thing_id();
+
+                var r = callback(null, ld);
                 if (!r) {
                     count--;
                 } else {
@@ -105,17 +103,13 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
                 }
 
                 if (count === 0) {
-                    return callback({
-                        end: true,
-                    });
+                    return callback(null, null);
                 }
             } else {
                 count = 0;
 
-                return callback({
-                    error: new errors.NotAuthorized(),
-                    end: true,
-                });
+                ld = _.shallowCopy(paramd);
+                return callback(new errors.NotAuthorized(), ld);
             }
         };
 
