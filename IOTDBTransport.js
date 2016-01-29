@@ -155,7 +155,7 @@ IOTDBTransport.prototype.added = function (paramd, callback) {
                 id: thing.thing_id(),
                 user: self.initd.user,
             };
-            return callback(callbackd);
+            return callback(null, callbackd);
         });
     });
 };

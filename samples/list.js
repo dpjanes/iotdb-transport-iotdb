@@ -24,6 +24,6 @@ transport.list({}, function(d) {
     }
     console.log("+", d.id);
 });
-transport.added({}, function(d) {
+transport.added({}, function(error, d) {
     console.log("+", d.id);
 });
