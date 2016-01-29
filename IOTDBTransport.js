@@ -216,11 +216,10 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
 
     var thing = self._thing_by_id(paramd.id);
     if (!thing) {
-        return callback({
+        return callback(new errors.NotFound(), {
             id: paramd.id,
             band: paramd.band,
             value: null,
-            error: new errors.NotFound(),
             user: self.initd.user,
         });
     }
@@ -240,12 +239,12 @@ IOTDBTransport.prototype.get = function (paramd, callback) {
         };
 
         if (!is_authorized) {
-            callbackd.error = new errors.NotAuthorized();
+            return callback(errors.NotAuthorized(), callbackd);
         } else {
             callbackd.value = thing.state(paramd.band);
+            return callback(null, callbackd);
         }
 
-        return callback(callbackd);
     });
 };
 
