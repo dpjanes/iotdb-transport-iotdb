@@ -257,15 +257,11 @@ IOTDBTransport.prototype.put = function (paramd, callback) {
     var self = this;
 
     self._validate_update(paramd, callback);
-    callback = callback || function () {};
+
+    var pd = _.shallowCopy(paramd);
 
     if (!paramd.id.match(/^urn:iotdb:thing:/)) {
-        return callback({
-            id: paramd.id,
-            band: paramd.band,
-            value: paramd.value,
-            error: new errors.NotAppropriate(),
-        });
+        return callback(new errors.NotAppropriate(), pd);
     }
 
     // XXX: at some point in the future we should be able to add new Things
@@ -277,12 +273,7 @@ IOTDBTransport.prototype.put = function (paramd, callback) {
             thing_id: paramd.id,
         }, "Thing not found");
 
-        return callback({
-            id: paramd.id,
-            band: paramd.band,
-            value: paramd.value,
-            error: new errors.NotFound(),
-        });
+        return callback(new errors.NotFound(), pd);
     }
 
     var authd = {
@@ -292,20 +283,12 @@ IOTDBTransport.prototype.put = function (paramd, callback) {
         user: paramd.user,
     };
     self.initd.authorize(authd, function (error, is_authorized) {
-        var callbackd = {
-            id: paramd.id,
-            band: paramd.band,
-            user: paramd.user,
-            value: paramd.value,
-        };
-
         if (!is_authorized) {
-            callbackd.error = new errors.NotAuthorized();
+            return callback(new errors.NotAuthorized(), pd);
         } else {
             thing.update(paramd.band, paramd.value);
+            return callback(null, pd);
         }
-
-        return callback(callbackd);
     });
 };
 
