@@ -92,7 +92,7 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
             }
 
             if (is_authorized) {
-                ld = _.shallowCopy(paramd);
+                ld = _.d.clone.shallow(paramd);
                 ld.id = thing.thing_id();
 
                 var r = callback(null, ld);
@@ -108,7 +108,7 @@ IOTDBTransport.prototype.list = function (paramd, callback) {
             } else {
                 count = 0;
 
-                ld = _.shallowCopy(paramd);
+                ld = _.d.clone.shallow(paramd);
                 return callback(new errors.NotAuthorized(), ld);
             }
         };
@@ -162,7 +162,7 @@ IOTDBTransport.prototype.bands = function (paramd, callback) {
 
     self._validate_bands(paramd, callback);
 
-    var bd = _.shallowCopy(paramd);
+    var bd = _.d.clone.shallow(paramd);
     bd.bandd = {};
 
     var thing = self._thing_by_id(paramd.id);
@@ -247,7 +247,7 @@ IOTDBTransport.prototype.put = function (paramd, callback) {
 
     self._validate_update(paramd, callback);
 
-    var pd = _.shallowCopy(paramd);
+    var pd = _.d.clone.shallow(paramd);
 
     if (!paramd.id.match(/^urn:iotdb:thing:/)) {
         return callback(new errors.NotAppropriate(), pd);
@@ -364,7 +364,7 @@ IOTDBTransport.prototype.removed = function (paramd, callback) {
 
     self._validate_remove(paramd, callback);
 
-    var rd = _.shallowCopy(paramd);
+    var rd = _.d.clone.shallow(paramd);
     delete rd.band;
     delete rd.value;
 
