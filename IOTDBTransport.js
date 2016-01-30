@@ -356,6 +356,21 @@ IOTDBTransport.prototype.updated = function (paramd, callback) {
     }
 };
 
+/**
+ *  See {iotdb_transport.Transport#removed} for documentation.
+ */
+IOTDBTransport.prototype.removed = function (paramd, callback) {
+    var self = this;
+
+    self._validate_remove(paramd, callback);
+
+    var rd = _.shallowCopy(paramd);
+    delete rd.band;
+    delete rd.value;
+
+    callback(new errors.NeverImplemented(), rd);
+}
+
 /* -- internals -- */
 IOTDBTransport.prototype._thing_by_id = function (id) {
     var self = this;
