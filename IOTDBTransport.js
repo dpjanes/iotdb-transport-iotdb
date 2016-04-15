@@ -249,7 +249,7 @@ IOTDBTransport.prototype.put = function (paramd, callback) {
 
     var pd = _.d.clone.shallow(paramd);
 
-    if (!paramd.id.match(/^urn:iotdb:thing:/)) {
+    if (!(paramd.id.match(/^urn:iotdb:thing:/) || paramd.id.match(/^urn:iotdb:t:/))) {
         return callback(new errors.NotAppropriate(), pd);
     }
 
