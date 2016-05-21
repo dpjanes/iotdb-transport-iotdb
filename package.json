@@ -4,8 +4,9 @@
         "url": "https://github.com/dpjanes/iotdb-transport-iotdb/issues"
     }, 
     "dependencies": {
-        "iotdb": ">=0.13.0", 
-        "iotdb-transport": "~0.0.31", 
+        "iotdb": ">=0.14.0", 
+        "iotdb-errors": "~0.0.3", 
+        "iotdb-transport": "~0.0.35", 
         "validate": "~3.0.1"
     }, 
     "description": "HomeStar / IOTDB Bridge for Filesystems", 
@@ -16,9 +17,9 @@
         "grunt-contrib-uglify": "~1.0.1", 
         "grunt-contrib-watch": "~1.0.0", 
         "grunt-jsbeautifier": "~0.2.12", 
-        "jshint-stylish": "~2.1.0", 
+        "jshint-stylish": "~2.2.0", 
         "load-grunt-tasks": "~3.5.0", 
-        "request": "~2.71.0"
+        "request": "~2.72.0"
     }, 
     "homepage": "https://homestar.io", 
     "homestar": {}, 
@@ -33,5 +34,5 @@
     "scripts": {
         "test": "grunt"
     }, 
-    "version": "0.0.21"
+    "version": "0.0.22"
 }
