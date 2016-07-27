@@ -24,7 +24,7 @@
 
 var iotdb = require('iotdb');
 var iotdb_transport = require('iotdb-transport');
-var errors = iotdb_transport.errors;
+const errors = require('iotdb-errors');
 var _ = iotdb._;
 
 var path = require('path');
@@ -185,6 +185,7 @@ IOTDBTransport.prototype.bands = function (paramd, callback) {
             "ostate": null,
             "model": null,
             "meta": null,
+            "connection": null,
         };
 
         var model_iri = thing.model_first("iot:model", null);
@@ -317,7 +318,7 @@ IOTDBTransport.prototype.updated = function (paramd, callback) {
     */
 
     var _monitor_band = function (_band) {
-        if ((_band === "istate") || (_band === "ostate") || (_band === "meta")) {
+        if ((_band === "istate") || (_band === "ostate") || (_band === "meta") || (_band === "connection")) {
             self.native.on(_band, function (thing) {
                 if (paramd.id && (thing.thing_id() !== paramd.id)) {
                     return;
@@ -349,7 +350,7 @@ IOTDBTransport.prototype.updated = function (paramd, callback) {
     if (paramd.band) {
         _monitor_band(paramd.band);
     } else {
-        var bands = ["istate", "ostate", "meta", "model"];
+        var bands = ["istate", "ostate", "meta", "model", "connection", ];
         for (var bi in bands) {
             _monitor_band(bands[bi]);
         }
