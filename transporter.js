@@ -49,7 +49,7 @@ const make = (initd, things) => {
         }
     );
 
-    const _things = things;
+    const _things = things || iotdb.things();
     assert(_.is.ThingSet(_things), "things must be a thing_set, not " + typeof things);
 
     self.rx.list = (observer, d) => {
