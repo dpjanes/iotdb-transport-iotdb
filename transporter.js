@@ -28,6 +28,7 @@ const iotdb_transport = require('iotdb-transport');
 const errors = require('iotdb-errors');
 
 const assert = require('assert');
+const Rx = require('rx');
 
 const logger = iotdb.logger({
     name: 'iotdb-transport-memory',
@@ -49,21 +50,67 @@ const make = (initd, things) => {
     );
 
     const _things = things;
-    assert(_.is.ThingSet(_things), "things must be a thing_set");
+    assert(_.is.ThingSet(_things), "things must be a thing_set, not " + typeof things);
 
     self.rx.list = (observer, d) => {
+        _things.forEach(thing => {
+            d = _.d.clone.shallow(d);
+            d.id = thing.thing_id();
+
+            observer.onNext(d);
+        });
+
+        observer.onCompleted();
     };
 
     self.rx.put = (observer, d) => {
+        throw new errors.NeverImplemented();
     };
     
     self.rx.get = (observer, d) => {
+        const thing = _things.find(thing => thing.thing_id() === d.id);
+        if (thing) {
+            d = _.d.clone.shallow(d);
+            d.value = thing.band(d.band).state();
+
+            observer.onNext(d);
+        }
+
+        observer.onCompleted();
     };
     
     self.rx.bands = (observer, d) => {
+        const thing = _things.find(thing => thing.thing_id() === d.id);
+        if (thing) {
+            thing   
+                .bands()
+                .sort()
+                .forEach(band => {
+                    d = _.d.clone.shallow(d);
+                    d.band = band;
+
+                    observer.onNext(d);
+                });
+        }
+
+        observer.onCompleted();
     };
 
     self.rx.updated = (observer, d) => {
+        [ "istate", "ostate", "meta", "model", "connection", ]
+            .filter(band => !d.band || (d.band === band))
+            .forEach(band => {
+                Rx.Observable.fromEvent(_things, band)
+                    .filter(thing => !d.id || (d.id === thing.thing_id()))
+                    .forEach(thing => {
+                        d = _.d.clone.shallow(d);
+                        d.id = thing.thing_id();
+                        d.band = band;
+                        d.value = thing.state(band);
+
+                        observer.onNext(d);
+                    });
+            });
     };
 
     return self;
