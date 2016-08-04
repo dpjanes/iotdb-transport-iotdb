@@ -64,34 +64,59 @@ const make = (initd, things) => {
     };
 
     self.rx.put = (observer, d) => {
-        throw new errors.NeverImplemented();
+        const thing = _things.find(thing => thing.thing_id() === d.id);
+        if (!thing) {
+            return observer.onError(new errors.NotFound("thing not found: " + d.id))
+        }
+
+        const band = thing.band(d.band);
+        if (!band) {
+            return observer.onError(new errors.NotFound("band not found: " + d.band))
+        }
+
+        band.update(d.value, {
+            replace: true,
+        });
+
+        d = _.d.clone.shallow(d);
+        observer.onNext(d);
+
+        observer.onCompleted();
     };
     
     self.rx.get = (observer, d) => {
         const thing = _things.find(thing => thing.thing_id() === d.id);
-        if (thing) {
-            d = _.d.clone.shallow(d);
-            d.value = thing.band(d.band).state();
-
-            observer.onNext(d);
+        if (!thing) {
+            return observer.onError(new errors.NotFound("thing not found: " + d.id))
         }
+
+        const band = thing.band(d.band);
+        if (!band) {
+            return observer.onError(new errors.NotFound("band not found: " + d.band))
+        }
+
+        d = _.d.clone.shallow(d);
+        d.value = band.state();
+        observer.onNext(d);
 
         observer.onCompleted();
     };
     
     self.rx.bands = (observer, d) => {
         const thing = _things.find(thing => thing.thing_id() === d.id);
-        if (thing) {
-            thing   
-                .bands()
-                .sort()
-                .forEach(band => {
-                    d = _.d.clone.shallow(d);
-                    d.band = band;
-
-                    observer.onNext(d);
-                });
+        if (!thing) {
+            return observer.onError(new errors.NotFound("thing not found: " + d.id))
         }
+
+        thing   
+            .bands()
+            .sort()
+            .forEach(band => {
+                d = _.d.clone.shallow(d);
+                d.band = band;
+
+                observer.onNext(d);
+            });
 
         observer.onCompleted();
     };
