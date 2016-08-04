@@ -63,6 +63,15 @@ const make = (initd, things) => {
         observer.onCompleted();
     };
 
+    self.rx.added = (observer, d) => {
+        _things.on("thing", thing => {
+            d = _.d.clone.shallow(d);
+            d.id = thing.thing_id();
+
+            observer.onNext(d);
+        });
+    };
+
     self.rx.put = (observer, d) => {
         const thing = _things.find(thing => thing.thing_id() === d.id);
         if (!thing) {

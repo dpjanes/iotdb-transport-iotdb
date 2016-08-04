@@ -12,22 +12,23 @@ const iotdb = require("iotdb")
 const _ = iotdb._;
 
 iotdb.use("homestar-wemo")
-const things = iotdb.connect("WeMoSocket")
 
 const transporter = require("../transporter");
-const transport = transporter.make({}, things);
+const transport = transporter.make({}, iotdb.connect("WeMoSocket"))
 
-things.on("thing", (thing) => {
-    let count = 0;
+transport
+    .added()
+    .subscribe(ad => {
+        let count = 0;
 
-    setInterval(() => {
-        const source = transport.put({
-            id: thing.thing_id(),
-            band: "ostate",
-            value: {
-                on: count++ % 2
-            },
-        });
-        source.subscribe(...testers.log_value("put"));
-    }, 1500);
-});
+        setInterval(() => {
+            const source = transport.put({
+                id: ad.id,
+                band: "ostate",
+                value: {
+                    on: count++ % 2
+                },
+            });
+            source.subscribe(...testers.log_value("put"));
+        }, 1500);
+    })
