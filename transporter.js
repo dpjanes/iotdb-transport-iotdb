@@ -54,10 +54,10 @@ const make = (initd, things) => {
 
     self.rx.list = (observer, d) => {
         _things.forEach(thing => {
-            d = _.d.clone.shallow(d);
-            d.id = thing.thing_id();
+            const rd = _.d.clone.shallow(d);
+            rd.id = thing.thing_id();
 
-            observer.onNext(d);
+            observer.onNext(rd);
         });
 
         observer.onCompleted();
@@ -65,10 +65,10 @@ const make = (initd, things) => {
 
     self.rx.added = (observer, d) => {
         _things.on("thing", thing => {
-            d = _.d.clone.shallow(d);
-            d.id = thing.thing_id();
+            const rd = _.d.clone.shallow(d);
+            rd.id = thing.thing_id();
 
-            observer.onNext(d);
+            observer.onNext(rd);
         });
     };
 
@@ -83,14 +83,23 @@ const make = (initd, things) => {
             return observer.onError(new errors.NotFound("band not found: " + d.band))
         }
 
-        band.update(d.value, {
+        const promise = band.update(d.value, {
             replace: true,
+            silent_timestamp: d.silent_timestamp,
         });
 
-        d = _.d.clone.shallow(d);
-        observer.onNext(d);
+        promise
+            .then(ud => {
+                const rd = _.d.clone.shallow(d);
+                rd.value = band.state();
+                rd.value["@timestamp"] = band.timestamp();
 
-        observer.onCompleted();
+                observer.onNext(rd);
+                observer.onCompleted();
+            })
+            .catch(error => {
+                observer.onError(error);
+            });
     };
     
     self.rx.get = (observer, d) => {
@@ -104,9 +113,11 @@ const make = (initd, things) => {
             return observer.onError(new errors.NotFound("band not found: " + d.band))
         }
 
-        d = _.d.clone.shallow(d);
-        d.value = band.state();
-        observer.onNext(d);
+        const rd = _.d.clone.shallow(d);
+        rd.value = band.state();
+        rd.value["@timestamp"] = band.timestamp();
+
+        observer.onNext(rd);
 
         observer.onCompleted();
     };
@@ -121,10 +132,10 @@ const make = (initd, things) => {
             .bands()
             .sort()
             .forEach(band => {
-                d = _.d.clone.shallow(d);
-                d.band = band;
+                const rd = _.d.clone.shallow(d);
+                rd.band = band;
 
-                observer.onNext(d);
+                observer.onNext(rd);
             });
 
         observer.onCompleted();
@@ -134,16 +145,21 @@ const make = (initd, things) => {
         [ "istate", "ostate", "meta", "model", "connection", ]
             .filter(band => !d.band || (d.band === band))
             .forEach(band => {
-                Rx.Observable.fromEvent(_things, band)
-                    .filter(thing => !d.id || (d.id === thing.thing_id()))
-                    .forEach(thing => {
-                        d = _.d.clone.shallow(d);
-                        d.id = thing.thing_id();
-                        d.band = band;
-                        d.value = thing.state(band);
+                _things.on(band, thing => {
+                    if (d.id && (d.id !== thing.thing_id())) {
+                        return;
+                    }
 
-                        observer.onNext(d);
-                    });
+                    const thing_band = thing.band(band);
+                    
+                    const rd = _.d.clone.shallow(d);
+                    rd.id = thing.thing_id();
+                    rd.band = band;
+                    rd.value = thing_band.state();
+                    rd.value["@timestamp"] = thing_band.timestamp();
+
+                    observer.onNext(rd);
+                })
             });
     };
 
