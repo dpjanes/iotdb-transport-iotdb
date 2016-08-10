@@ -23,3 +23,8 @@
 "use strict";
 
 exports.Transport = require('./IOTDBTransport').IOTDBTransport;
+
+const transporter = require('./transporter');
+exports.make = transporter.make;
+
+
