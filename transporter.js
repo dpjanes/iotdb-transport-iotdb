@@ -44,7 +44,7 @@ const make = (initd, things) => {
     const _initd = _.d.compose.shallow(
         initd, {
         },
-        iotdb.keystore().get("/transports/IOTDBTransport/initd"), {
+        iotdb.keystore().get("/transports/iotdb-transport-iotdb/initd"), {
             prefix: ""
         }
     );
