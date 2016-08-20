@@ -10,7 +10,7 @@
         "iotdb-transport": "~3.0.2", 
         "rx": "~4.1.0"
     }, 
-    "description": "IOTDB Transport for IOTDB",
+    "description": "IOTDB Transport for IOTDB", 
     "devDependencies": {
         "grunt": "~1.0.1", 
         "grunt-contrib-jshint": "~1.0.0", 
@@ -35,5 +35,5 @@
     "scripts": {
         "test": "grunt"
     }, 
-    "version": "3.0.0"
+    "version": "3.0.1"
 }
