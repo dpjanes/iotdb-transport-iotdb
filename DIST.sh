@@ -31,9 +31,10 @@ echo "=================="
 
     tar cf - \
         --exclude "node_modules" \
+        --exclude "Gruntfile.js" \
         README.md LICENSE \
         homestar.json package.json \
-        index.js IOTDBTransport.js \
+        *.js \
         |
     ( cd "${NPM_DST}" && tar xvf - && npm publish ) || exit 1
     git commit -m "new release" package.json || exit 1

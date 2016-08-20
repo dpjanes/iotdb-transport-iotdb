@@ -4,6 +4,14 @@
  *  David Janes
  *  IOTDB.org
  *  2016-08-04
+ *
+ *  Note this is fairly complicated and is 
+ *  mainly for illustration purposs. In "normal"
+ *  IOTDB world you'd probably just do
+ *
+ *      things = iotdb.connect("WeMoSocket")
+ *      count = 0
+ *      setInterval(() => things.set(":on", count++ % 2), 1500);
  */
 
 const testers = require("iotdb-transport").testers;

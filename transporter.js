@@ -85,7 +85,6 @@ const make = (initd, things) => {
 
         const promise = band.update(d.value, {
             replace: true,
-            silent_timestamp: d.silent_timestamp,
         });
 
         promise
@@ -118,7 +117,6 @@ const make = (initd, things) => {
         rd.value["@timestamp"] = band.timestamp();
 
         observer.onNext(rd);
-
         observer.onCompleted();
     };
     
