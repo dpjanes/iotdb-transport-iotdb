@@ -7,7 +7,7 @@
         "assert": "~1.4.1", 
         "iotdb": ">=3.0.0", 
         "iotdb-errors": "~3.0.2", 
-        "iotdb-transport": "~3.0.2", 
+        "iotdb-transport": "~3.0.4", 
         "rx": "~4.1.0"
     }, 
     "description": "IOTDB Transport for IOTDB", 
@@ -35,5 +35,5 @@
     "scripts": {
         "test": "grunt"
     }, 
-    "version": "3.0.1"
+    "version": "3.0.2"
 }
