@@ -1,11 +1,11 @@
 # iotdb-transport-iotdb
-IOTDB Transport for IOTDB (!)
+[IOTDB](https://github.com/dpjanes/node-iotdb) 
+[Transporter](https://github.com/dpjanes/node-iotdb/blob/master/docs/transporters.md)
+for IOTDB (!)
 
 <img src="https://raw.githubusercontent.com/dpjanes/iotdb-homestar/master/docs/HomeStar.png" align="right" />
 
-# Introduction
-
-Read about Transporters [here](https://github.com/dpjanes/iotdb-transport).
+# About
 
 Transporters are all about connecting to other Transporters, e.g. so 
 we can make an API to all our Things. 
@@ -14,6 +14,9 @@ using IOTDB, and you'll often be connecting other Transporters to this.
 
 See the samples folder for working examples
 
+* [Read more about Transporters](https://github.com/dpjanes/node-iotdb/blob/master/docs/transporters.md)
+
+# Use
 ## Basic
 
 Don't forget your `subscribe`s! Most Transporter methods 

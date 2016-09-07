@@ -35,9 +35,6 @@ const logger = iotdb.logger({
     module: 'transporter',
 });
 
-const global_bddd = {};
-const subjectd = new Map();
-
 const make = (initd, things) => {
     const self = iotdb_transport.make();
 
@@ -83,7 +80,14 @@ const make = (initd, things) => {
             return observer.onError(new errors.NotFound("band not found: " + d.band))
         }
 
-        const promise = band.update(d.value, {
+        // we may want to persist more things
+        const value = _.d.clone.shallow(d.value);
+        if (d.band === "meta") {
+             value["iot:thing-id"] = thing.thing_id();
+             value["iot:model-id"] = thing.model_id();
+        }
+
+        const promise = band.update(value, {
             replace: true,
         });
 
@@ -149,7 +153,7 @@ const make = (initd, things) => {
                     }
 
                     const thing_band = thing.band(band);
-                    
+
                     const rd = _.d.clone.shallow(d);
                     rd.id = thing.thing_id();
                     rd.band = band;
