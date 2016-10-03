@@ -31,7 +31,7 @@ const assert = require('assert');
 const Rx = require('rx');
 
 const logger = iotdb.logger({
-    name: 'iotdb-transport-memory',
+    name: 'iotdb-transport-iotdb',
     module: 'transporter',
 });
 
