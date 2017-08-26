@@ -4,7 +4,6 @@
         "url": "https://github.com/dpjanes/iotdb-transport-iotdb/issues"
     }, 
     "dependencies": {
-        "assert": "~1.4.1", 
         "iotdb": ">=3.0.0", 
         "iotdb-errors": "~3.0.2", 
         "iotdb-transport": "~3.0.9", 
